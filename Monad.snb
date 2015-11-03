@@ -27,19 +27,23 @@
       "collapsed" : false
     },
     "cell_type" : "code",
-    "source" : "//this monad is just for playing around with \"optional\" values\n//it is similar to the Haskellian \"Maybe\" monad\nsealed trait Option[A]{\n    def map[B](fun: A => B): Option[B]\n    def flatMap[B](fun: A => Option[B]): Option[B]\n  }\n  \n  case class Some[A](a: A) extends Option[A] {\n    def map[B](fun: A => B): Option[B] = new Some(fun(a))\n    def flatMap[B](fun: A => Option[B]): Option[B] = fun(a)\n  }\n  case class None[A]() extends Option[A] {\n    def map[B](fun: A => B): Option[B] = new None\n    def flatMap[B](fun: A => Option[B]): Option[B] = new None\n  }\n\n//********************************************************************//\n\n  //here we define a trait describing our Monad \n  //and the two mandatory methods: map & flatMap\n  sealed trait Monad[+A] {\n    def map[B](fun: A => B): Monad[B] = this match {\n      case aMonad(a) => aMonad(fun(a))\n      case NullMonad => NullMonad\n    }\n    \n    def flatMap[B](fun: A => Monad[B]): Monad[B] = this match {\n      case aMonad(a) => fun(a)\n      case NullMonad => NullMonad\n    }\n  }\n\n  //A class that defines a monad by extending the trait\n  case class aMonad[+A](a: A) extends Monad[A] {\n  }\n  //Another class for special \"null\"-monads \n  case object NullMonad extends Monad[Nothing] {\n  }\n  \n  //two simple case classes to be used inside our monad\n  case class AClass(id: Int = -1, value: String = \"undefined\") {\n    \n    override def toString() : String = {\n      s\"ID: $id, Value: $value\"\n    }\n  }\n  case class BClass(id: Int = -1,value: String = \"undefined\",\n                       extra: String = \"extra data\") {\n    override def toString() : String = {\n      s\"ID: $id, Value: $value, Extra: $extra\"\n    }\n  }",
+    "source" : "//this monad is just for playing around with \"optional\" values\n//it is similar to the Haskellian \"Maybe\" monad\nsealed trait Option[A]{\n    def map[B](fun: A => B): Option[B]\n    def flatMap[B](fun: A => Option[B]): Option[B]\n  }\n  \n  case class Some[A](a: A) extends Option[A] {\n    def map[B](fun: A => B): Option[B] = new Some(fun(a))\n    def flatMap[B](fun: A => Option[B]): Option[B] = fun(a)\n  }\n  case class None[A]() extends Option[A] {\n    def map[B](fun: A => B): Option[B] = new None\n    def flatMap[B](fun: A => Option[B]): Option[B] = new None\n  }\n\n//*************** ADDED ON Nov.03.2015 ************************//\n\n  //Base trait for Robots & Androids\n  //the two properties \"name\" and \"model\" will be overridden in\n  //the respective subclasses \"Data\" and \"C3PO\"\n  trait Robot {\n    def name: String = \"unknown robot\"\n    def model: String = \"a standard robot\"\n    def say(sentence: String) = {\n      println(name + \" says: \" + sentence)\n    }\n  }\n  \n  //A concrete \"Robot\" from the Star Trek Universe\n  case class Data(var androidName: String, var androidModel: String) extends Robot {\n    \n    //define getter & setter for name  \n    override def name=androidName\n    def name_=(newName: String) {\n      androidName = newName\n    }\n    //define getter & setter for model\n    override def model=androidModel\n    def model_=(newModel: String) {\n        androidModel = newModel\n      }\n    }\n  //Also a concrete \"Robot\" from the Star Wars Universe\n  case class C3PO(var robotName: String, var robotModel: String) extends Robot{\n    \n    //define getter & setter for name\n    override def name=robotName\n    def name_=(newName: String) {\n      robotName = newName\n    }\n    //define getter & setter for model\n    override def model=robotModel\n    def model_=(newModel: String) {\n      robotModel = newModel\n    }\n  }\n\n//********************************************************************//\n\n  //here we define a trait describing our Monad \n  //and the two mandatory methods: map & flatMap\n  sealed trait Monad[+A] {\n    def map[B](fun: A => B): Monad[B] = this match {\n      case aMonad(a) => aMonad(fun(a))\n      case NullMonad => NullMonad\n    }\n    \n    /*def flatMap[B](fun: A => Monad[B]): Monad[B] = this match {\n      case aMonad(a) => fun(a)\n      case NullMonad => NullMonad\n    }*/\n    \n    //alternative version of the flatMap method\n    def flatMap[B](fun: A => Monad[B]): Monad[B] = toFlatList(map(fun))\n    \n    def toFlatList[A](list: Monad[Monad[A]]): Monad[A] =\n      list match {\n        case aMonad(element) => element\n        case NullMonad => NullMonad\n    }\n  }\n\n  //A class that defines a monad by extending the trait\n  case class aMonad[+A](a: A) extends Monad[A] {\n  }\n  //Another class for special \"null\"-monads \n  case object NullMonad extends Monad[Nothing] {\n  }\n  \n  //two simple case classes to be used inside our monad\n  case class AClass(id: Int = -1, value: String = \"undefined\") {\n    \n    override def toString() : String = {\n      s\"ID: $id, Value: $value\"\n    }\n  }\n  case class BClass(id: Int = -1,value: String = \"undefined\",\n                       extra: String = \"extra data\") {\n    override def toString() : String = {\n      s\"ID: $id, Value: $value, Extra: $extra\"\n    }\n  }",
     "outputs" : [ {
       "name" : "stdout",
       "output_type" : "stream",
-      "text" : "defined trait Option\r\ndefined class Some\r\ndefined class None\r\ndefined trait Monad\r\ndefined class aMonad\r\ndefined object NullMonad\r\ndefined class AClass\r\ndefined class BClass\n"
+      "text" : "defined trait Option\r\ndefined class Some\r\ndefined class None\r\ndefined trait Robot\r\ndefined class Data\r\ndefined class C3PO\r\ndefined trait Monad\r\ndefined class aMonad\r\ndefined object NullMonad\r\ndefined class AClass\r\ndefined class BClass\n"
     }, {
       "metadata" : { },
       "data" : {
         "text/html" : ""
       },
       "output_type" : "execute_result",
-      "execution_count" : 31
+      "execution_count" : 11
     } ]
+  }, {
+    "metadata" : { },
+    "cell_type" : "markdown",
+    "source" : "##The app containing two Monads in two separate method calls (run & runRobot) ##\n\nThe first example in run() is for testing the basic Monad elements (map & flatMap)\n\nThe example in runRobot() is more detailed and shows the advantages of using Monads instead of dealing with side-effects directly and/or imperatively"
   }, {
     "metadata" : {
       "trusted" : true,
@@ -47,7 +51,7 @@
       "collapsed" : false
     },
     "cell_type" : "code",
-    "source" : "object app extends App {\n  \n  def run() = {\n    \n    def mapAToB(a: AClass) : BClass = {\n      println(\"map on \" + a.toString())\n      new BClass(a.id + 100, \"COPY_FROM_\" + a.value, \"EXTRA \" + a.id)\n    }                                              \n\n    def flatMapAToB(a: AClass) : Monad[BClass] = {\n      println(\"flatMap on \" + a.toString())\n      aMonad(new BClass(a.id + 100,\"COPY_FROM_\" + a.value,\"some extra value\"))\n    }    \n                   \n                                                \n    val numMonad = aMonad[List[Int]](List(1,2,3))  \n\n    //monad.map { mapAToB }                       \n                                                  \n    numMonad.flatMap { x => aMonad(x.map{ a => a.toString() + \"_string\"}) }\n\n  }\n \n  \n}\n \n  ",
+    "source" : "object app extends App {\n\n  def run() = {\n    \n    def mapAToB(a: AClass) : BClass = {\n      println(\"map on \" + a.toString())\n      new BClass(a.id + 100, \"COPY_FROM_\" + a.value, \"EXTRA \" + a.id)\n    }                                              \n\n    def flatMapAToB(a: AClass) : Monad[BClass] = {\n      println(\"flatMap on \" + a.toString())\n      aMonad(new BClass(a.id + 100,\"COPY_FROM_\" + a.value,\"some extra value\"))\n    }    \n                   \n                                                \n    val numMonad = aMonad[List[Int]](List(1,2,3))  \n\n    //monad.map { mapAToB }                       \n                                                  \n    numMonad.flatMap { x => aMonad(x.map{ a => a.toString() + \"_string\"}) }\n\n  }\n  \n  //this is the helper function that generates some side-effects\n  //here we use pattern matching to distinguish between C3PO's and any other structures\n  def upgradeRobot(robot: Robot) : Robot = robot match {\n    case C3PO(name, model) => Data(name + \"_REASSEMBLED\", \"Star Trek Android\")\n    case _ => Data(\"Default Data\", \"Star Trek Android\")\n  }  \n  \n \n  def runRobots() = {\n    //STEP 1: create a Monad that contains a list of C3PO's\n  \n  val robots = aMonad(List(C3PO(\"C3PO v1.0\", \"Star Wars Robot\"),\n                           C3PO(\"C3PO v1.2\", \"Star Wars Robot\"),\n                           C3PO(\"C3PO v2.0\", \"Star Wars Robot\")))\n  \n  //STEP 2: Test our C3PO's by iterating over the C3PO-collection and letting them say \"Hello\"\n  robots.map { x => x.foreach { r => r.say(\"Hello, Universe!\") } }\n  \n  //STEP 3: Reassemble the C3PO's into Data's without letting any side-effects slip though the Monad boundaries\n  //Now imagine you're doing here some \"dangerous, side-effects generating stuff\" like accessing DBs, writing to Console, File or Network\n  //\n  //The goal is to do all this without allowing it to \"break out\" and spill over your surrounding code (or affecting some unrelated \n  //code parts you're not currently aware of!\n  //  \n  //Monads are here to contain and control side-effects (or: the state of the application)\n  //Whatever you may do, it should not change the shape of the structure participating in or generating side-effects\n  //Here we let a list of things being changed to some other list of things without changing its shape (the amount of robots remained the same)\n  //Also, the properties of Robots remained the same (from the external point of view). Both robot models can do \"say\" and have a \"name\" and a \"model\"\n  //property. So, no matter what side-effects may happen all of them will retain the same shape.\n  val reassembled = robots.flatMap { allRobots => aMonad(allRobots.map(nextRobot => upgradeRobot(nextRobot))) }\n  \n  //STEP 4: Now test our reasembled Robots by letting them speak.\n  reassembled.map { x => x.foreach { r => r.say(\"Hello, Universe!\") } }\n  }\n}\n \n  ",
     "outputs" : [ {
       "name" : "stdout",
       "output_type" : "stream",
@@ -55,10 +59,10 @@
     }, {
       "metadata" : { },
       "data" : {
-        "text/html" : "$line39.$read$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$app$@7a9f8010"
+        "text/html" : "$line23.$read$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$$iw$app$@11d21139"
       },
       "output_type" : "execute_result",
-      "execution_count" : 32
+      "execution_count" : 15
     } ]
   }, {
     "metadata" : {
@@ -67,19 +71,28 @@
       "collapsed" : false
     },
     "cell_type" : "code",
-    "source" : "app.run()",
+    "source" : "app.runRobots()\n//app.run()  //for testing the base functions map & flatMap described in the first Monad",
     "outputs" : [ {
       "name" : "stdout",
       "output_type" : "stream",
-      "text" : "res9: Monad[List[String]] = aMonad(List(1_string, 2_string, 3_string))\n"
+      "text" : "C3PO v1.0 says: Hello, Universe!\nC3PO v1.2 says: Hello, Universe!\nC3PO v2.0 says: Hello, Universe!\nC3PO v1.0_REASSEMBLED says: Hello, Universe!\nC3PO v1.2_REASSEMBLED says: Hello, Universe!\nC3PO v2.0_REASSEMBLED says: Hello, Universe!\nres7: Monad[Unit] = aMonad(())\n"
     }, {
       "metadata" : { },
       "data" : {
-        "text/html" : "aMonad(List(1_string, 2_string, 3_string))"
+        "text/html" : "aMonad(())"
       },
       "output_type" : "execute_result",
-      "execution_count" : 33
+      "execution_count" : 17
     } ]
+  }, {
+    "metadata" : {
+      "trusted" : true,
+      "input_collapsed" : false,
+      "collapsed" : true
+    },
+    "cell_type" : "code",
+    "source" : "",
+    "outputs" : [ ]
   } ],
   "nbformat" : 4
 }
